@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JJ Haszan Colexons</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+     <img src="newlogo.png" alt="JJ Haszan Colexons Logo" width="180">
+        <h1>JJ Haszan Colexons</h1>
+        <p>Welcome to our Online Store</p>
+    </header>
+    <main>
+        <h2>Our Products</h2>
+        <div class="products" id="productList">
+            <p>Loading products...</p>
+        </div>
+        <h2>About Us</h2>
+        <p>
+            JJ Haszan Colexons offers stylish Hijabs, Burkas,
+            Jewels and Bags. We provide quality products with
+            easy WhatsApp ordering.
+        </p>
+        <h2>Contact Us</h2>
+        <p>📞 +91 7200382331</p>
+        <button onclick="window.open('https://wa.me/918807141609', '_blank')">
+            WhatsApp Us
+        </button>
+    </main>
+    <footer>
+        <p>© 2026 JJ Haszan Colexons</p>
+    </footer>
+    <script>
+        const supabaseUrl = "https://catvfsxxhnqkojfedsdz.supabase.co";
+        const supabaseKey = "sb_publishable_Ly7pjMubpIOBX3BeJCCLXg_APgvRAst";
+        const supabaseClient = window.supabase.createClient(
+            supabaseUrl,
+            supabaseKey
+        );
+        async function loadProducts() {
+            const productList = document.getElementById("productList");
+            const { data, error } = await supabaseClient
+                .from("products")
+                .select("id, name, price, image_url, created_at")
+                .order("created_at", { ascending: true });
+            if (error) {
+                console.error("Product loading error:", error);
+                productList.innerHTML =
+                    "<p>Products could not be loaded. Please try again.</p>";
+                return;
+            }
+            if (!data || data.length === 0) {
+                productList.innerHTML = "<p>No products available yet.</p>";
+                return;
+            }
+            productList.innerHTML = "";
+            data.forEach(function (product) {
+                const card = document.createElement("div");
+                card.className = "product-card";
+                if (product.image_url) {
+                    const image = document.createElement("img");
+                    image.src = product.image_url;
+                    image.alt = product.name || "Product image";
+                    image.width = 200;
+                    image.loading = "lazy";
+                    card.appendChild(image);
+                }
+                const name = document.createElement("h3");
+                name.textContent = product.name || "Product";
+                card.appendChild(name);
+                const price = document.createElement("p");
+                price.className = "product-price";
+                const numericPrice = Number(product.price);
+                price.textContent =
+                    product.price !== null &&
+                    product.price !== "" &&
+                    Number.isFinite(numericPrice)
+                        ? "₹" + numericPrice.toLocaleString("en-IN")
+                        : "Price unavailable";
+                card.appendChild(price);
+                const buyButton = document.createElement("button");
+                buyButton.textContent = "Buy Now";
+                buyButton.addEventListener("click", function () {
+                    const message =
+                        "Hi, I want to order " +
+                        (product.name || "this product") +
+                        ". Price: " +
+                        price.textContent;
+                    window.open(
+                        "https://wa.me/918807141609?text=" +
+                        encodeURIComponent(message),
+                        "_blank"
+                    );
+                });
+                card.appendChild(buyButton);
+                productList.appendChild(card);
+            });
+        }
+        loadProducts();
+    </script>
+</body>
+</html>
